@@ -1,6 +1,12 @@
 # Training Scripts
 
-后续放训练、评估、导出脚本：
+训练脚本按批次日期放置。当前批次为：
+
+```text
+scripts/20260615/
+```
+
+后续脚本命名建议：
 
 ```text
 train_yolo_seg.py

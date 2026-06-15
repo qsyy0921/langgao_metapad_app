@@ -1,0 +1,11 @@
+# YOLO26 segmentation dataset config for the 20260615 batch.
+# Use the `yolo26` conda environment and GPU training.
+path: E:/company/app/model-training/datasets/20260615/yolo_dataset
+train: images/train
+val: images/val
+test: images/test
+
+names:
+  0: luoshuan
+  1: biaoqi
+  2: mifengjiao

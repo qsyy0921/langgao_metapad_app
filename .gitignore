@@ -7,6 +7,7 @@ __pycache__/
 .pad-server/
 server/.pad-server/
 server/pad-share/
+tools/
 
 # Android / Gradle outputs for the future APK project
 .gradle/
@@ -20,6 +21,7 @@ model-training/datasets/**
 !model-training/datasets/
 !model-training/datasets/README.md
 model-training/runs/
+model-training/results/
 model-training/weights/
 model-training/models/
 *.pt

@@ -1,0 +1,46 @@
+# PatchCore config for the 20260615 batch.
+# Train only on normal samples. Defects such as dirt, dents, extra bolts,
+# iron chips, and aluminum chips are detected as anomaly regions.
+dataset_root: E:/company/app/model-training/datasets/20260615/patchcore_dataset
+prepared_roi_root: E:/company/app/model-training/datasets/20260615/patchcore_rois
+
+frame_sampling:
+  normal_stride: 10
+  anomaly_stride: 5
+  normal_val_ratio: 0.2
+  normal_frame_limit_per_video: 30
+  anomaly_frame_limit_per_video: 40
+
+source_videos:
+  normal_feature_library:
+    - videos/good.mp4
+  anomaly_eval:
+    extra_bolt:
+      - videos/fu1.mp4
+      - videos/fu2.mp4
+
+rois:
+  - name: inner_area
+    description: "盒内区域，用于检测铁屑、铝屑、多余螺栓等杂物"
+    crop_xyxy_norm: [0.02, 0.12, 0.83, 0.97]
+    train_dir: inner_area/train/good
+    val_dir: inner_area/val/good
+    test_dir: inner_area/test
+    threshold: null
+  - name: surface_area
+    description: "接线盒端面，用于检测脏污、磕碰等缺陷"
+    crop_xyxy_norm: [0.02, 0.06, 0.86, 0.98]
+    train_dir: surface_area/train/good
+    val_dir: surface_area/val/good
+    test_dir: surface_area/test
+    threshold: null
+
+runtime:
+  conda_env: yolo26
+  device: cuda:0
+  backbone: wide_resnet50_2
+  input_size: 224
+  coreset_ratio: 0.1
+  max_memory_patches: 20000
+  threshold_strategy: max_val_plus_margin
+  threshold_margin: 0.01
