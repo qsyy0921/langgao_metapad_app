@@ -86,9 +86,9 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.core.content.ContextCompat
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import org.json.JSONObject
 import java.io.File
 import java.net.HttpURLConnection
 import java.net.URL
@@ -135,6 +135,8 @@ private data class InspectionUi(
     val status: String = "待检测",
     val summary: String = "确认照片后自动上传服务器检测",
     val originalImagePath: String? = null,
+    val detectedImagePath: String? = null,
+    val recordId: String? = null,
     val checks: List<InspectionCheckUi> = emptyList(),
 )
 
@@ -163,6 +165,7 @@ private fun MetaPadTheme(content: @Composable () -> Unit) {
 
 @Composable
 private fun MetaPadApp() {
+    val context = LocalContext.current
     var selectedScreenName by rememberSaveable { mutableStateOf(AppScreen.Capture.name) }
     var capturedPhotoPath by rememberSaveable { mutableStateOf<String?>(null) }
     var serverUrl by rememberSaveable { mutableStateOf("http://192.168.0.141:8765") }
@@ -185,11 +188,22 @@ private fun MetaPadApp() {
 
     LaunchedEffect(inspection.requestId) {
         if (inspection.loading) {
-            delay(900)
-            val result = demoInspectionResult(
-                requestId = inspection.requestId,
-                originalImagePath = inspection.originalImagePath,
-            )
+            val currentInspection = inspection
+            val photoPath = currentInspection.originalImagePath
+            val result = if (photoPath == null) {
+                currentInspection.copy(
+                    loading = false,
+                    status = "ERROR",
+                    summary = "没有找到待上传照片，请返回拍照后重试",
+                )
+            } else {
+                inspectImageOnServer(
+                    context = context,
+                    serverUrl = serverUrl,
+                    requestId = currentInspection.requestId,
+                    originalImagePath = photoPath,
+                )
+            }
             inspection = result
             if (autoSave) {
                 records.add(
@@ -528,8 +542,8 @@ private fun InspectionScreen(
                 )
                 PhotoResultPanel(
                     title = "检测图",
-                    photoPath = null,
-                    fallbackText = "服务器标注图",
+                    photoPath = inspection.detectedImagePath,
+                    fallbackText = "等待服务器标注图",
                     modifier = Modifier.weight(1f),
                 )
                 ResultPanel(inspection = inspection, modifier = Modifier.weight(1.05f))
@@ -871,22 +885,6 @@ private fun createPhotoFile(context: Context): File {
     return File(captureDir, "metapad_$timestamp.jpg")
 }
 
-private fun demoInspectionResult(requestId: Int, originalImagePath: String?): InspectionUi {
-    return InspectionUi(
-        requestId = requestId,
-        loading = false,
-        status = "NG",
-        summary = "检测未通过：内部发现疑似多余螺栓",
-        originalImagePath = originalImagePath,
-        checks = listOf(
-            InspectionCheckUi("螺栓与漆标", "PASS", "螺栓 14/14，漆标 14/14"),
-            InspectionCheckUi("白色密封胶", "PASS", "密封胶区域连续完整"),
-            InspectionCheckUi("端面脏污 / 磕碰", "PASS", "未发现明显脏污或磕碰"),
-            InspectionCheckUi("内部杂物", "NG", "PatchCore 检测到疑似多余螺栓，请清理后重拍"),
-        ),
-    )
-}
-
 private suspend fun testHealth(serverUrl: String): String = withContext(Dispatchers.IO) {
     val normalized = serverUrl.trim().trimEnd('/')
     if (normalized.isBlank()) return@withContext "请输入服务器地址"
@@ -903,6 +901,168 @@ private suspend fun testHealth(serverUrl: String): String = withContext(Dispatch
     }.getOrElse { error ->
         "连接失败：${error.message ?: "网络不可用"}"
     }
+}
+
+private suspend fun inspectImageOnServer(
+    context: Context,
+    serverUrl: String,
+    requestId: Int,
+    originalImagePath: String,
+): InspectionUi = withContext(Dispatchers.IO) {
+    val normalized = serverUrl.trim().trimEnd('/')
+    if (normalized.isBlank()) {
+        return@withContext inspectionError(requestId, originalImagePath, "请输入服务器地址")
+    }
+
+    val imageFile = File(originalImagePath)
+    if (!imageFile.exists()) {
+        return@withContext inspectionError(requestId, originalImagePath, "照片文件不存在，请重新拍照")
+    }
+
+    runCatching {
+        val response = uploadImageForInspection(
+            inspectUrl = "$normalized/api/inspect",
+            imageFile = imageFile,
+        )
+        val json = JSONObject(response)
+        val passed = json.optBoolean("pass", false)
+        val recordId = json.optString("recordId").ifBlank { null }
+        val reasons = json.optJSONArray("reasons")
+            ?.let { array -> List(array.length()) { index -> array.optString(index) }.filter { it.isNotBlank() } }
+            .orEmpty()
+        val detectedUrl = json.optString("detectedUrl")
+        val detectedImagePath = if (detectedUrl.isNotBlank()) {
+            downloadServerImage(
+                context = context,
+                baseUrl = normalized,
+                pathOrUrl = detectedUrl,
+                fileName = "detected_${recordId ?: requestId}.jpg",
+            )
+        } else {
+            null
+        }
+        val status = if (passed) "PASS" else "NG"
+        val summary = if (passed) {
+            "检测通过：服务器未返回异常原因"
+        } else {
+            "检测未通过：" + reasons.ifEmpty { listOf("服务器返回未通过，但未给出原因") }.joinToString("；")
+        }
+        InspectionUi(
+            requestId = requestId,
+            loading = false,
+            status = status,
+            summary = summary,
+            originalImagePath = originalImagePath,
+            detectedImagePath = detectedImagePath,
+            recordId = recordId,
+            checks = buildServerChecks(passed, reasons),
+        )
+    }.getOrElse { error ->
+        inspectionError(
+            requestId = requestId,
+            originalImagePath = originalImagePath,
+            message = "连接服务器失败：${error.message ?: "未知错误"}",
+        )
+    }
+}
+
+private fun uploadImageForInspection(inspectUrl: String, imageFile: File): String {
+    val boundary = "----MetaPadBoundary${System.currentTimeMillis()}"
+    val lineEnd = "\r\n"
+    val connection = (URL(inspectUrl).openConnection() as HttpURLConnection).apply {
+        requestMethod = "POST"
+        doInput = true
+        doOutput = true
+        connectTimeout = 10_000
+        readTimeout = 30_000
+        setRequestProperty("Connection", "Keep-Alive")
+        setRequestProperty("Content-Type", "multipart/form-data; boundary=$boundary")
+    }
+
+    connection.outputStream.use { output ->
+        output.writeText("--$boundary$lineEnd")
+        output.writeText(
+            "Content-Disposition: form-data; name=\"image\"; filename=\"${imageFile.name}\"$lineEnd",
+        )
+        output.writeText("Content-Type: image/jpeg$lineEnd$lineEnd")
+        imageFile.inputStream().use { input -> input.copyTo(output) }
+        output.writeText(lineEnd)
+        output.writeText("--$boundary--$lineEnd")
+    }
+
+    return connection.use { http ->
+        val code = http.responseCode
+        val stream = if (code in 200..299) http.inputStream else http.errorStream
+        val body = stream?.bufferedReader(Charsets.UTF_8)?.use { it.readText() }.orEmpty()
+        if (code !in 200..299) {
+            error("HTTP $code ${body.take(160)}")
+        }
+        body
+    }
+}
+
+private fun downloadServerImage(
+    context: Context,
+    baseUrl: String,
+    pathOrUrl: String,
+    fileName: String,
+): String {
+    val url = if (pathOrUrl.startsWith("http://") || pathOrUrl.startsWith("https://")) {
+        URL(pathOrUrl)
+    } else {
+        URL(baseUrl + if (pathOrUrl.startsWith("/")) pathOrUrl else "/$pathOrUrl")
+    }
+    val outputDir = File(context.cacheDir, "server-results").apply { mkdirs() }
+    val outputFile = File(outputDir, fileName)
+    val connection = (url.openConnection() as HttpURLConnection).apply {
+        requestMethod = "GET"
+        connectTimeout = 10_000
+        readTimeout = 30_000
+    }
+    connection.use { http ->
+        val code = http.responseCode
+        if (code !in 200..299) {
+            error("下载检测图失败：HTTP $code")
+        }
+        http.inputStream.use { input ->
+            outputFile.outputStream().use { output -> input.copyTo(output) }
+        }
+    }
+    return outputFile.absolutePath
+}
+
+private fun buildServerChecks(passed: Boolean, reasons: List<String>): List<InspectionCheckUi> {
+    if (passed) {
+        return listOf(
+            InspectionCheckUi("服务器检测", "PASS", "已收到服务器检测结果和标注图"),
+            InspectionCheckUi("螺栓与漆标", "PASS", "以服务器模型输出为准"),
+            InspectionCheckUi("白色密封胶", "PASS", "以服务器模型输出为准"),
+            InspectionCheckUi("端面 / 内部异常", "PASS", "以服务器模型输出为准"),
+        )
+    }
+    return listOf(
+        InspectionCheckUi("服务器检测", "NG", reasons.ifEmpty { listOf("服务器未给出原因") }.joinToString("；")),
+        InspectionCheckUi("螺栓与漆标", "REVIEW", "等待服务器细分检测项"),
+        InspectionCheckUi("白色密封胶", "REVIEW", "等待服务器细分检测项"),
+        InspectionCheckUi("端面 / 内部异常", "REVIEW", "等待服务器细分检测项"),
+    )
+}
+
+private fun inspectionError(requestId: Int, originalImagePath: String?, message: String): InspectionUi {
+    return InspectionUi(
+        requestId = requestId,
+        loading = false,
+        status = "ERROR",
+        summary = message,
+        originalImagePath = originalImagePath,
+        checks = listOf(
+            InspectionCheckUi("服务器连接", "NG", message),
+        ),
+    )
+}
+
+private fun java.io.OutputStream.writeText(text: String) {
+    write(text.toByteArray(Charsets.UTF_8))
 }
 
 private inline fun <T : HttpURLConnection, R> T.use(block: (T) -> R): R {
