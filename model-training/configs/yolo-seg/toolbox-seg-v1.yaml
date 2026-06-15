@@ -1,0 +1,14 @@
+# YOLO segmentation dataset config.
+# Update `path` to the local dataset location before training.
+path: ../datasets/yolo-seg-v1
+train: images/train
+val: images/val
+test: images/test
+
+names:
+  0: junction_box
+  1: inner_area
+  2: bolt
+  3: paint_mark
+  4: sealant
+  5: terminal_block

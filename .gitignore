@@ -7,6 +7,8 @@ __pycache__/
 .pad-server/
 pad-share/
 ipad-share/
+server/.pad-server/
+server/pad-share/
 
 # Android / Gradle outputs for the future APK project
 .gradle/
@@ -14,6 +16,18 @@ build/
 */build/
 local.properties
 captures/
+
+# Model training data and outputs
+model-training/datasets/**
+!model-training/datasets/
+!model-training/datasets/README.md
+model-training/runs/
+model-training/weights/
+model-training/models/
+*.pt
+*.onnx
+*.engine
+*.ckpt
 
 # IDE
 .idea/

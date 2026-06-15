@@ -119,7 +119,7 @@ app -> feature
 
 原型图：
 
-![拍照界面原型](ui-prototype-capture.png)
+![拍照界面原型](../android-app/docs/ui-prototype-capture.png)
 
 > 拍照界面必须保持简单。第一版不做实时移动指导，只保留取景框、默认补光、拍照、重拍、确认照片。
 
@@ -158,7 +158,7 @@ app -> feature
 
 原型图：
 
-![检测界面原型](ui-prototype-inspection.png)
+![检测界面原型](../android-app/docs/ui-prototype-inspection.png)
 
 检测清单结构：
 
@@ -207,7 +207,7 @@ app -> feature
 
 原型图：
 
-![存储界面原型](ui-prototype-storage.png)
+![存储界面原型](../android-app/docs/ui-prototype-storage.png)
 
 存储模式：
 
@@ -527,11 +527,11 @@ Token 鉴权
 
 ```text
 docs/architecture-ai-inspection-zh.png
-docs/ui-prototype-capture.png
-docs/ui-prototype-inspection.png
-docs/ui-prototype-storage.png
-docs/assets/toolbox-reference.jpg
-docs/metapad-ui-prototypes.html
+android-app/docs/ui-prototype-capture.png
+android-app/docs/ui-prototype-inspection.png
+android-app/docs/ui-prototype-storage.png
+android-app/docs/assets/toolbox-reference.jpg
+android-app/docs/metapad-ui-prototypes.html
 ```
 
 旧版架构图保留：

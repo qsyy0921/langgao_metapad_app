@@ -275,6 +275,17 @@ def get_storage() -> object:
     return jsonify(read_storage_config())
 
 
+@app.get("/api/health")
+def health() -> object:
+    return jsonify(
+        {
+            "status": "ok",
+            "serverTime": now_text(),
+            "modelVersion": "prototype",
+        }
+    )
+
+
 @app.post("/api/storage")
 def update_storage() -> object:
     data = request.get_json(silent=True) or {}
