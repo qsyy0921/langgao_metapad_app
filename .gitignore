@@ -1,0 +1,24 @@
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+
+# Runtime logs and local transfer data
+.pad-server/
+pad-share/
+ipad-share/
+
+# Android / Gradle outputs for the future APK project
+.gradle/
+build/
+*/build/
+local.properties
+captures/
+
+# IDE
+.idea/
+*.iml
+
+# OS
+Thumbs.db
+Desktop.ini

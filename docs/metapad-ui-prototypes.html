@@ -1,0 +1,864 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>MetaPad 检测 App 界面原型</title>
+  <style>
+    :root {
+      --bg: #edf2f6;
+      --panel: #ffffff;
+      --ink: #17212f;
+      --muted: #687586;
+      --line: #d8e1ea;
+      --teal: #087a7d;
+      --teal-2: #0d9a95;
+      --blue: #1f5f9f;
+      --amber: #d99a24;
+      --red: #c84432;
+      --green: #1f8a55;
+      --shadow: 0 14px 34px rgba(26, 44, 64, 0.13);
+      font-family: "Microsoft YaHei", "PingFang SC", "Noto Sans CJK SC", Arial, sans-serif;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      padding: 28px;
+      background: #dfe7ee;
+      color: var(--ink);
+    }
+
+    body.export {
+      padding: 0;
+    }
+
+    body.export .screen {
+      margin: 0;
+      border-radius: 0;
+      box-shadow: none;
+    }
+
+    .screen {
+      width: 1280px;
+      height: 800px;
+      margin: 0 0 36px;
+      background: linear-gradient(135deg, #f8fbfd 0%, #edf4f8 100%);
+      border: 1px solid #cbd7e3;
+      border-radius: 22px;
+      overflow: hidden;
+      box-shadow: var(--shadow);
+      display: grid;
+      grid-template-columns: 92px 1fr;
+    }
+
+    .nav {
+      background: #102033;
+      color: #dce8f4;
+      padding: 22px 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+      align-items: center;
+    }
+
+    .brand {
+      width: 54px;
+      height: 54px;
+      border-radius: 14px;
+      background: linear-gradient(145deg, #0a817f, #1b5e86);
+      display: grid;
+      place-items: center;
+      color: #fff;
+      font-weight: 800;
+      font-size: 18px;
+      margin-bottom: 18px;
+    }
+
+    .nav-item {
+      width: 68px;
+      min-height: 66px;
+      border-radius: 12px;
+      display: grid;
+      place-items: center;
+      text-align: center;
+      font-size: 16px;
+      line-height: 1.2;
+      color: #9fb3c6;
+    }
+
+    .nav-item.active {
+      color: #fff;
+      background: rgba(34, 154, 149, 0.24);
+      border: 1px solid rgba(102, 218, 211, 0.45);
+    }
+
+    .main {
+      padding: 24px 28px 26px;
+      display: grid;
+      grid-template-rows: 58px 1fr;
+      gap: 18px;
+    }
+
+    .topbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+    }
+
+    .title {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .title h1 {
+      margin: 0;
+      font-size: 28px;
+      line-height: 1.15;
+      letter-spacing: 0;
+    }
+
+    .title p {
+      margin: 0;
+      color: var(--muted);
+      font-size: 15px;
+    }
+
+    .status-chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      border-radius: 999px;
+      padding: 9px 14px;
+      font-size: 15px;
+      font-weight: 700;
+      background: #e7f7f4;
+      color: #08756f;
+      border: 1px solid #b9e6de;
+    }
+
+    .status-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: currentColor;
+    }
+
+    .capture-grid {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) 354px;
+      gap: 18px;
+      min-height: 0;
+    }
+
+    .camera-card {
+      position: relative;
+      border-radius: 18px;
+      overflow: hidden;
+      background: #0d141d;
+      box-shadow: var(--shadow);
+      border: 1px solid #111d28;
+      min-height: 0;
+    }
+
+    .camera-card img,
+    .image-panel img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+
+    .camera-overlay {
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(ellipse at center, transparent 45%, rgba(0,0,0,0.28) 82%);
+    }
+
+    .guide-box {
+      position: absolute;
+      left: 12%;
+      right: 12%;
+      top: 13%;
+      bottom: 16%;
+      border: 5px solid #22b37d;
+      border-radius: 18px;
+      box-shadow: 0 0 0 999px rgba(0, 0, 0, 0.08);
+    }
+
+    .guide-box::before,
+    .guide-box::after {
+      content: "";
+      position: absolute;
+      width: 42px;
+      height: 42px;
+      border-color: #ffffff;
+      border-style: solid;
+    }
+
+    .guide-box::before {
+      left: -5px;
+      top: -5px;
+      border-width: 5px 0 0 5px;
+      border-radius: 16px 0 0 0;
+    }
+
+    .guide-box::after {
+      right: -5px;
+      bottom: -5px;
+      border-width: 0 5px 5px 0;
+      border-radius: 0 0 16px 0;
+    }
+
+    .guidance-banner {
+      position: absolute;
+      left: 50%;
+      bottom: 92px;
+      transform: translateX(-50%);
+      min-width: 560px;
+      max-width: 780px;
+      padding: 14px 20px;
+      border-radius: 12px;
+      background: rgba(13, 26, 39, 0.84);
+      color: #fff;
+      text-align: center;
+      font-size: 22px;
+      font-weight: 800;
+      backdrop-filter: blur(8px);
+      border: 1px solid rgba(255,255,255,0.18);
+    }
+
+    .arrow-hint {
+      position: absolute;
+      color: #fff;
+      font-size: 46px;
+      font-weight: 900;
+      text-shadow: 0 3px 16px rgba(0,0,0,0.5);
+    }
+
+    .arrow-left { left: 58px; top: 45%; }
+    .arrow-right { right: 58px; top: 45%; }
+
+    .camera-actions {
+      position: absolute;
+      left: 24px;
+      right: 24px;
+      bottom: 22px;
+      display: grid;
+      grid-template-columns: 1fr 1fr 1.4fr 1.4fr;
+      gap: 12px;
+    }
+
+    .btn {
+      border: 0;
+      border-radius: 12px;
+      padding: 13px 16px;
+      font-size: 17px;
+      font-weight: 800;
+      color: #fff;
+      background: #243447;
+      box-shadow: 0 7px 16px rgba(0,0,0,0.18);
+    }
+
+    .btn.primary { background: linear-gradient(135deg, #0a7b78, #0e9b83); }
+    .btn.warn { background: linear-gradient(135deg, #c77a17, #d99a24); }
+    .btn.light { background: rgba(255,255,255,0.16); border: 1px solid rgba(255,255,255,0.28); }
+
+    .side-panel,
+    .card,
+    .result-card,
+    .storage-panel {
+      background: rgba(255,255,255,0.9);
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      box-shadow: 0 10px 24px rgba(31, 56, 78, 0.08);
+    }
+
+    .side-panel {
+      padding: 18px;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+
+    .panel-title {
+      font-size: 20px;
+      font-weight: 850;
+      margin: 0 0 4px;
+    }
+
+    .metric {
+      padding: 14px;
+      border-radius: 12px;
+      background: #f3f7fa;
+      border: 1px solid #d9e4ec;
+    }
+
+    .metric strong {
+      display: block;
+      font-size: 16px;
+      margin-bottom: 5px;
+    }
+
+    .metric span {
+      display: block;
+      color: var(--muted);
+      font-size: 14px;
+      line-height: 1.45;
+    }
+
+    .progress {
+      height: 8px;
+      border-radius: 999px;
+      background: #dfe8ef;
+      overflow: hidden;
+      margin-top: 10px;
+    }
+
+    .progress i {
+      display: block;
+      height: 100%;
+      background: linear-gradient(90deg, #0d8f82, #27b879);
+      width: 86%;
+    }
+
+    .result-layout {
+      display: grid;
+      grid-template-columns: 1fr 1fr 330px;
+      gap: 16px;
+      min-height: 0;
+    }
+
+    .image-panel {
+      position: relative;
+      overflow: hidden;
+      border-radius: 16px;
+      background: #111a23;
+      border: 1px solid #cad6e2;
+      box-shadow: var(--shadow);
+    }
+
+    .image-label {
+      position: absolute;
+      left: 16px;
+      top: 16px;
+      padding: 8px 13px;
+      border-radius: 999px;
+      background: rgba(13, 28, 43, 0.82);
+      color: #fff;
+      font-weight: 850;
+      font-size: 16px;
+    }
+
+    .bbox {
+      position: absolute;
+      border: 4px solid var(--green);
+      border-radius: 10px;
+      background: rgba(31, 138, 85, 0.08);
+    }
+
+    .bbox.fail {
+      border-color: var(--red);
+      background: rgba(200, 68, 50, 0.14);
+    }
+
+    .bbox.warn {
+      border-color: var(--amber);
+      background: rgba(217, 154, 36, 0.13);
+    }
+
+    .bbox span {
+      position: absolute;
+      left: -4px;
+      top: -34px;
+      padding: 5px 9px;
+      border-radius: 8px;
+      background: var(--green);
+      color: #fff;
+      font-size: 13px;
+      font-weight: 800;
+      white-space: nowrap;
+    }
+
+    .bbox.fail span { background: var(--red); }
+    .bbox.warn span { background: var(--amber); }
+
+    .checklist {
+      padding: 18px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .summary-ng {
+      border-radius: 14px;
+      padding: 16px;
+      background: #fff1ed;
+      border: 1px solid #f1b7ab;
+      color: #8f2a1f;
+    }
+
+    .summary-pass {
+      border-radius: 14px;
+      padding: 16px;
+      background: #edf9f2;
+      border: 1px solid #b9e3c9;
+      color: #14683f;
+    }
+
+    .summary-ng strong,
+    .summary-pass strong {
+      display: block;
+      font-size: 22px;
+      margin-bottom: 6px;
+    }
+
+    .check-row {
+      display: grid;
+      grid-template-columns: 36px 1fr;
+      gap: 10px;
+      padding: 12px;
+      border-radius: 12px;
+      border: 1px solid #dce6ee;
+      background: #f8fbfd;
+    }
+
+    .check-icon {
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      display: grid;
+      place-items: center;
+      color: #fff;
+      font-weight: 900;
+      background: var(--green);
+    }
+
+    .check-icon.fail { background: var(--red); }
+    .check-icon.warn { background: var(--amber); }
+
+    .check-row h3 {
+      margin: 0 0 3px;
+      font-size: 16px;
+    }
+
+    .check-row p {
+      margin: 0;
+      font-size: 13px;
+      color: var(--muted);
+      line-height: 1.42;
+    }
+
+    .storage-layout {
+      display: grid;
+      grid-template-columns: 420px 1fr;
+      gap: 18px;
+      min-height: 0;
+    }
+
+    .records-list {
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .record-item {
+      display: grid;
+      grid-template-columns: 58px 1fr auto;
+      align-items: center;
+      gap: 12px;
+      padding: 12px;
+      border: 1px solid #dae5ed;
+      border-radius: 13px;
+      background: #f8fbfd;
+    }
+
+    .record-item.active {
+      border-color: #73c9bf;
+      background: #eaf8f5;
+    }
+
+    .thumb {
+      width: 58px;
+      height: 46px;
+      border-radius: 9px;
+      object-fit: cover;
+      border: 1px solid #c7d4df;
+    }
+
+    .record-item h3 {
+      margin: 0;
+      font-size: 16px;
+    }
+
+    .record-item p {
+      margin: 3px 0 0;
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    .tag {
+      border-radius: 999px;
+      padding: 6px 10px;
+      font-weight: 850;
+      font-size: 13px;
+    }
+
+    .tag.pass { background: #e8f8ef; color: var(--green); }
+    .tag.fail { background: #fff0ec; color: var(--red); }
+    .tag.pending { background: #fff7e5; color: #9b6814; }
+
+    .storage-detail {
+      display: grid;
+      grid-template-rows: 210px 1fr;
+      gap: 16px;
+    }
+
+    .detail-top {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 14px;
+    }
+
+    .detail-image {
+      position: relative;
+      border-radius: 14px;
+      overflow: hidden;
+      border: 1px solid #d3dfe8;
+      background: #13202d;
+    }
+
+    .detail-image img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .settings-box {
+      display: grid;
+      grid-template-columns: 1.1fr 1fr;
+      gap: 16px;
+      padding: 18px;
+    }
+
+    .segmented {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 8px;
+      padding: 7px;
+      background: #edf4f8;
+      border: 1px solid #d7e4ed;
+      border-radius: 14px;
+    }
+
+    .segment {
+      padding: 13px 8px;
+      border-radius: 10px;
+      text-align: center;
+      font-weight: 850;
+      color: #5b6b7c;
+    }
+
+    .segment.active {
+      background: #0b817b;
+      color: #fff;
+      box-shadow: 0 8px 15px rgba(8, 122, 125, 0.22);
+    }
+
+    .field {
+      display: grid;
+      gap: 7px;
+      margin-top: 14px;
+    }
+
+    .field label {
+      color: var(--muted);
+      font-size: 14px;
+      font-weight: 700;
+    }
+
+    .input {
+      padding: 13px 14px;
+      border-radius: 11px;
+      border: 1px solid #d4e0e9;
+      background: #fff;
+      font-size: 16px;
+      font-family: Consolas, "Microsoft YaHei", sans-serif;
+    }
+
+    .action-row {
+      display: flex;
+      gap: 10px;
+      margin-top: 16px;
+    }
+
+    .small-btn {
+      border: 0;
+      border-radius: 10px;
+      padding: 11px 13px;
+      font-size: 15px;
+      font-weight: 800;
+      color: #fff;
+      background: #1f5f9f;
+    }
+
+    .small-btn.secondary { background: #536579; }
+    .small-btn.primary { background: #087a7d; }
+
+    .info-list {
+      display: grid;
+      gap: 10px;
+    }
+
+    .info-line {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      border-bottom: 1px solid #e3ebf1;
+      padding-bottom: 10px;
+      font-size: 15px;
+    }
+
+    .info-line span:first-child { color: var(--muted); }
+    .info-line span:last-child { font-weight: 850; }
+  </style>
+</head>
+<body>
+  <section id="capture-screen" class="screen">
+    <aside class="nav">
+      <div class="brand">LG</div>
+      <div class="nav-item active">拍照</div>
+      <div class="nav-item">检测</div>
+      <div class="nav-item">存储</div>
+      <div class="nav-item">设置</div>
+    </aside>
+    <main class="main">
+      <header class="topbar">
+        <div class="title">
+          <h1>工具箱拍照</h1>
+          <p>请根据实时提示移动平板，确保工具箱完整、清晰、无遮挡。</p>
+        </div>
+        <div class="status-chip"><i class="status-dot"></i>服务器在线 192.168.0.141</div>
+      </header>
+      <div class="capture-grid">
+        <section class="camera-card">
+          <img src="assets/toolbox-reference.jpg" alt="工具箱相机预览">
+          <div class="camera-overlay"></div>
+          <div class="guide-box"></div>
+          <div class="arrow-hint arrow-left">←</div>
+          <div class="arrow-hint arrow-right">→</div>
+          <div class="guidance-banner">向右微调，确保右侧密封胶完整入框</div>
+          <div class="camera-actions">
+            <button class="btn warn">补光已开启</button>
+            <button class="btn light">重拍</button>
+            <button class="btn primary">拍照</button>
+            <button class="btn primary">提交检测</button>
+          </div>
+        </section>
+        <aside class="side-panel">
+          <h2 class="panel-title">实时拍照引导</h2>
+          <div class="metric">
+            <strong>构图状态：需要微调</strong>
+            <span>工具箱主体已识别，右侧边缘略接近取景框。</span>
+            <div class="progress"><i></i></div>
+          </div>
+          <div class="metric">
+            <strong>补光灯：默认开启</strong>
+            <span>拍照页进入后自动打开补光，避免盒内区域偏暗。</span>
+          </div>
+          <div class="metric">
+            <strong>拍摄要求</strong>
+            <span>14 个螺栓和漆标清晰可见；白色密封胶完整入框；盒内底部无反光遮挡。</span>
+          </div>
+          <div class="metric">
+            <strong>下一步提示</strong>
+            <span>保持平板稳定 1 秒后即可拍照。</span>
+          </div>
+        </aside>
+      </div>
+    </main>
+  </section>
+
+  <section id="inspection-screen" class="screen">
+    <aside class="nav">
+      <div class="brand">LG</div>
+      <div class="nav-item">拍照</div>
+      <div class="nav-item active">检测</div>
+      <div class="nav-item">存储</div>
+      <div class="nav-item">设置</div>
+    </aside>
+    <main class="main">
+      <header class="topbar">
+        <div class="title">
+          <h1>检测结果</h1>
+          <p>记录编号：20260615-0008，模型版本：toolbox-ai-v1.0。</p>
+        </div>
+        <div class="status-chip" style="background:#fff0ec;color:#c84432;border-color:#f0b4aa;"><i class="status-dot"></i>检测未通过</div>
+      </header>
+      <div class="result-layout">
+        <section class="image-panel">
+          <img src="assets/toolbox-reference.jpg" alt="检测原图">
+          <div class="image-label">原图</div>
+        </section>
+        <section class="image-panel">
+          <img src="assets/toolbox-reference.jpg" alt="检测图">
+          <div class="image-label">检测图</div>
+          <div class="bbox" style="left:13%; top:14%; width:76%; height:58%;"><span>工具箱区域</span></div>
+          <div class="bbox warn" style="left:20%; top:56%; width:12%; height:10%; color:#d99a24;"><span>漆标复核</span></div>
+          <div class="bbox fail" style="left:65%; top:69%; width:9%; height:8%; color:#c84432;"><span>F1 疑似铝屑</span></div>
+        </section>
+        <aside class="result-card checklist">
+          <div class="summary-ng">
+            <strong>NG 检测未通过</strong>
+            <span>发现 1 处疑似内部杂物，请清理后重新检测。</span>
+          </div>
+          <div class="check-row">
+            <div class="check-icon">✓</div>
+            <div>
+              <h3>螺栓与漆标</h3>
+              <p>螺栓 14/14，漆标 14/14，无漏装、无漏画。</p>
+            </div>
+          </div>
+          <div class="check-row">
+            <div class="check-icon">✓</div>
+            <div>
+              <h3>白色密封胶</h3>
+              <p>连续完整，未发现漏打区域。</p>
+            </div>
+          </div>
+          <div class="check-row">
+            <div class="check-icon">✓</div>
+            <div>
+              <h3>端面脏污 / 磕碰</h3>
+              <p>端面状态正常，未发现明显脏污或磕碰。</p>
+            </div>
+          </div>
+          <div class="check-row">
+            <div class="check-icon fail">!</div>
+            <div>
+              <h3>内部杂物</h3>
+              <p>F1：盒内右下区域检测到疑似铝屑，置信度 86%。</p>
+            </div>
+          </div>
+          <div class="action-row">
+            <button class="small-btn secondary">重新拍照</button>
+            <button class="small-btn primary">保存异常记录</button>
+          </div>
+        </aside>
+      </div>
+    </main>
+  </section>
+
+  <section id="storage-screen" class="screen">
+    <aside class="nav">
+      <div class="brand">LG</div>
+      <div class="nav-item">拍照</div>
+      <div class="nav-item">检测</div>
+      <div class="nav-item active">存储</div>
+      <div class="nav-item">设置</div>
+    </aside>
+    <main class="main">
+      <header class="topbar">
+        <div class="title">
+          <h1>存储与检测记录</h1>
+          <p>管理本地记录、服务器同步、存储策略和后续导出。</p>
+        </div>
+        <div class="status-chip"><i class="status-dot"></i>已同步 7 条记录</div>
+      </header>
+      <div class="storage-layout">
+        <section class="storage-panel records-list">
+          <h2 class="panel-title">历史记录</h2>
+          <div class="record-item active">
+            <img class="thumb" src="assets/toolbox-reference.jpg" alt="">
+            <div>
+              <h3>2026-06-15 15:28</h3>
+              <p>F1 疑似铝屑，已保存服务器</p>
+            </div>
+            <span class="tag fail">NG</span>
+          </div>
+          <div class="record-item">
+            <img class="thumb" src="assets/toolbox-reference.jpg" alt="">
+            <div>
+              <h3>2026-06-15 14:52</h3>
+              <p>螺栓与漆标 14/14</p>
+            </div>
+            <span class="tag pass">PASS</span>
+          </div>
+          <div class="record-item">
+            <img class="thumb" src="assets/toolbox-reference.jpg" alt="">
+            <div>
+              <h3>2026-06-15 13:41</h3>
+              <p>等待网络恢复后同步</p>
+            </div>
+            <span class="tag pending">待同步</span>
+          </div>
+          <div class="record-item">
+            <img class="thumb" src="assets/toolbox-reference.jpg" alt="">
+            <div>
+              <h3>2026-06-14 18:20</h3>
+              <p>端面脏污复核记录</p>
+            </div>
+            <span class="tag fail">NG</span>
+          </div>
+        </section>
+        <section class="storage-detail">
+          <div class="detail-top">
+            <div class="detail-image">
+              <img src="assets/toolbox-reference.jpg" alt="">
+              <div class="image-label">原图</div>
+            </div>
+            <div class="detail-image">
+              <img src="assets/toolbox-reference.jpg" alt="">
+              <div class="image-label">检测图</div>
+              <div class="bbox fail" style="left:65%; top:68%; width:9%; height:10%; color:#c84432;"><span>F1</span></div>
+            </div>
+          </div>
+          <div class="storage-panel settings-box">
+            <div>
+              <h2 class="panel-title">存储策略</h2>
+              <div class="segmented">
+                <div class="segment">只存平板</div>
+                <div class="segment">只存服务器</div>
+                <div class="segment active">两边都存</div>
+              </div>
+              <div class="field">
+                <label>服务器地址</label>
+                <div class="input">http://192.168.0.141:8765</div>
+              </div>
+              <div class="action-row">
+                <button class="small-btn primary">测试连接</button>
+                <button class="small-btn secondary">同步失败记录</button>
+                <button class="small-btn secondary">导出记录</button>
+              </div>
+            </div>
+            <div>
+              <h2 class="panel-title">当前记录详情</h2>
+              <div class="info-list">
+                <div class="info-line"><span>检测结果</span><span style="color:#c84432;">NG</span></div>
+                <div class="info-line"><span>异常项</span><span>内部杂物</span></div>
+                <div class="info-line"><span>异常位置</span><span>盒内右下区域</span></div>
+                <div class="info-line"><span>存储状态</span><span>本地 + 服务器</span></div>
+                <div class="info-line"><span>模型版本</span><span>toolbox-ai-v1.0</span></div>
+              </div>
+            </div>
+          </div>
+        </section>
+      </div>
+    </main>
+  </section>
+  <script>
+    const params = new URLSearchParams(window.location.search);
+    const selected = params.get("screen");
+    if (selected) {
+      document.body.classList.add("export");
+      for (const screen of document.querySelectorAll(".screen")) {
+        screen.style.display = screen.id === `${selected}-screen` ? "grid" : "none";
+      }
+    }
+  </script>
+</body>
+</html>
