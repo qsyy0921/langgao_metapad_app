@@ -3,10 +3,8 @@ __pycache__/
 *.py[cod]
 .venv/
 
-# Runtime logs and local transfer data
+# Runtime logs and server-side local data
 .pad-server/
-pad-share/
-ipad-share/
 server/.pad-server/
 server/pad-share/
 

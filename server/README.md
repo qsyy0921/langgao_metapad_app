@@ -15,7 +15,7 @@ server/
 ├─ src/metapad_server/      服务端源码
 ├─ scripts/                 启动脚本
 ├─ requirements.txt         Python 依赖
-└─ pad-share/               运行时共享/记录目录，未纳入 git
+└─ pad-share/               服务端运行时共享/记录目录，未纳入 git
 ```
 
 ## 本地启动
@@ -32,6 +32,8 @@ python -m venv .venv
 ```text
 http://<PC局域网IP>:8765/
 ```
+
+运行时图片、检测记录和临时共享文件统一写入 `server/pad-share/`。根目录下不再保留旧的 `pad-share/` 或 `ipad-share/`。
 
 ## API 草案
 
