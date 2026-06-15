@@ -149,7 +149,7 @@
 
     .capture-grid {
       display: grid;
-      grid-template-columns: minmax(0, 1fr) 354px;
+      grid-template-columns: minmax(0, 1fr) 320px;
       gap: 18px;
       min-height: 0;
     }
@@ -231,24 +231,13 @@
       border: 1px solid rgba(255,255,255,0.18);
     }
 
-    .arrow-hint {
-      position: absolute;
-      color: #fff;
-      font-size: 46px;
-      font-weight: 900;
-      text-shadow: 0 3px 16px rgba(0,0,0,0.5);
-    }
-
-    .arrow-left { left: 58px; top: 45%; }
-    .arrow-right { right: 58px; top: 45%; }
-
     .camera-actions {
       position: absolute;
       left: 24px;
       right: 24px;
       bottom: 22px;
       display: grid;
-      grid-template-columns: 1fr 1fr 1.4fr 1.4fr;
+      grid-template-columns: 1fr 1.25fr 1.6fr;
       gap: 12px;
     }
 
@@ -540,7 +529,7 @@
 
     .settings-box {
       display: grid;
-      grid-template-columns: 1.1fr 1fr;
+      grid-template-columns: 0.9fr 1.1fr;
       gap: 16px;
       padding: 18px;
     }
@@ -639,8 +628,8 @@
     <main class="main">
       <header class="topbar">
         <div class="title">
-          <h1>工具箱拍照</h1>
-          <p>请根据实时提示移动平板，确保工具箱完整、清晰、无遮挡。</p>
+          <h1>照片确认</h1>
+          <p>请确认照片清晰、完整、无遮挡；确认后系统会自动检测并保存记录。</p>
         </div>
         <div class="status-chip"><i class="status-dot"></i>服务器在线 192.168.0.141</div>
       </header>
@@ -649,34 +638,30 @@
           <img src="assets/toolbox-reference.jpg" alt="工具箱相机预览">
           <div class="camera-overlay"></div>
           <div class="guide-box"></div>
-          <div class="arrow-hint arrow-left">←</div>
-          <div class="arrow-hint arrow-right">→</div>
-          <div class="guidance-banner">向右微调，确保右侧密封胶完整入框</div>
+          <div class="guidance-banner">请确认接线盒完整入框，螺栓和漆标清晰可见</div>
           <div class="camera-actions">
             <button class="btn warn">补光已开启</button>
             <button class="btn light">重拍</button>
-            <button class="btn primary">拍照</button>
-            <button class="btn primary">提交检测</button>
+            <button class="btn primary">确认照片</button>
           </div>
         </section>
         <aside class="side-panel">
-          <h2 class="panel-title">实时拍照引导</h2>
+          <h2 class="panel-title">确认要点</h2>
           <div class="metric">
-            <strong>构图状态：需要微调</strong>
-            <span>工具箱主体已识别，右侧边缘略接近取景框。</span>
-            <div class="progress"><i></i></div>
+            <strong>1. 接线盒完整入框</strong>
+            <span>外边缘、白色密封胶和盒内区域都在画面内。</span>
           </div>
           <div class="metric">
-            <strong>补光灯：默认开启</strong>
-            <span>拍照页进入后自动打开补光，避免盒内区域偏暗。</span>
+            <strong>2. 关键细节清晰</strong>
+            <span>14 个螺栓、漆标、密封胶和盒内底部清晰可见。</span>
           </div>
           <div class="metric">
-            <strong>拍摄要求</strong>
-            <span>14 个螺栓和漆标清晰可见；白色密封胶完整入框；盒内底部无反光遮挡。</span>
+            <strong>3. 确认后自动检测</strong>
+            <span>点击“确认照片”后自动上传服务器，无需再选择功能。</span>
           </div>
           <div class="metric">
-            <strong>下一步提示</strong>
-            <span>保持平板稳定 1 秒后即可拍照。</span>
+            <strong>保存方式</strong>
+            <span>检测完成后按设置自动存储，可在设置界面关闭或修改存储位置。</span>
           </div>
         </aside>
       </div>
@@ -695,7 +680,7 @@
       <header class="topbar">
         <div class="title">
           <h1>检测结果</h1>
-          <p>记录编号：20260615-0008，模型版本：toolbox-ai-v1.0。</p>
+          <p>记录编号：20260615-0008，模型版本：toolbox-ai-v1.0，结果按设置存储。</p>
         </div>
         <div class="status-chip" style="background:#fff0ec;color:#c84432;border-color:#f0b4aa;"><i class="status-dot"></i>检测未通过</div>
       </header>
@@ -745,8 +730,7 @@
             </div>
           </div>
           <div class="action-row">
-            <button class="small-btn secondary">重新拍照</button>
-            <button class="small-btn primary">保存异常记录</button>
+            <button class="small-btn primary" style="width:100%;">返回拍照</button>
           </div>
         </aside>
       </div>
@@ -765,7 +749,7 @@
       <header class="topbar">
         <div class="title">
           <h1>存储与检测记录</h1>
-          <p>管理本地记录、服务器同步、存储策略和后续导出。</p>
+          <p>查看检测记录、按设置保存状态和服务器同步状态。</p>
         </div>
         <div class="status-chip"><i class="status-dot"></i>已同步 7 条记录</div>
       </header>
@@ -819,20 +803,16 @@
           </div>
           <div class="storage-panel settings-box">
             <div>
-              <h2 class="panel-title">存储策略</h2>
-              <div class="segmented">
-                <div class="segment">只存平板</div>
-                <div class="segment">只存服务器</div>
-                <div class="segment active">两边都存</div>
-              </div>
-              <div class="field">
-                <label>服务器地址</label>
-                <div class="input">http://192.168.0.141:8765</div>
+              <h2 class="panel-title">按设置保存</h2>
+              <div class="info-list">
+                <div class="info-line"><span>自动存储</span><span>已开启</span></div>
+                <div class="info-line"><span>存储位置</span><span>平板 + 服务器</span></div>
+                <div class="info-line"><span>同步状态</span><span style="color:#087a7d;">已同步</span></div>
+                <div class="info-line"><span>服务器</span><span>192.168.0.141</span></div>
+                <div class="info-line"><span>配置入口</span><span>设置界面</span></div>
               </div>
               <div class="action-row">
-                <button class="small-btn primary">测试连接</button>
-                <button class="small-btn secondary">同步失败记录</button>
-                <button class="small-btn secondary">导出记录</button>
+                <button class="small-btn primary" style="width:100%;">返回拍照</button>
               </div>
             </div>
             <div>
